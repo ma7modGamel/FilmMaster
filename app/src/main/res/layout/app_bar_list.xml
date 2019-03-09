@@ -43,32 +43,50 @@
 
         <Button
             android:background="@mipmap/ic_rate"
-            android:layout_width="50dp"
-
-            android:layout_height="wrap_content" />
+            android:layout_width="30dp"
+            android:layout_height="30dp" />
         <LinearLayout
             android:padding="8dp"
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="70dp">
+            android:layout_height="80dp">
             <Button
+                android:id="@+id/btnPrevies"
                 android:layout_margin="8dp"
                 android:background="@mipmap/ic_back"
                 android:layout_width="0dp"
-                android:layout_weight="1"
+                android:layout_weight="0.5"
                 android:layout_height="match_parent" />
+           <LinearLayout
+               android:layout_width="0dp"
+               android:layout_weight="2"
+             android:layout_gravity="center"
+               android:gravity="center"
+               android:orientation="vertical"
+               android:layout_height="match_parent">
+               <Button
+                   android:id="@+id/btnCloseLayout"
+
+                   android:background="@mipmap/ic_close"
+                   android:layout_width="30dp"
+                   android:layout_gravity ="top|center"
+                   android:layout_height="30dp" />
+               <TextView
+                   android:id="@+id/tv_currentpage"
+                   android:gravity="center"
+                   android:layout_margin="4dp"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"
+                   android:textSize="16sp"
+                   android:text="0000000"
+                   android:textColor="#FFFFFF"/>
+           </LinearLayout>
             <Button
-                android:id="@+id/btnCloseLayout"
-                android:layout_margin="2dp"
-                android:background="@mipmap/ic_close"
-                android:layout_width="0dp"
-                android:layout_weight=".5"
-                android:layout_height="30dp" />
-            <Button
+                android:id="@+id/btnNext"
                 android:layout_margin="8dp"
                 android:background="@mipmap/ic_next"
                 android:layout_width="0dp"
-                android:layout_weight="1"
+                android:layout_weight="0.5"
                 android:layout_height="match_parent" />
         </LinearLayout>
     </LinearLayout>
