@@ -1,6 +1,7 @@
 package com.mgh.filmmaster.Adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -9,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.mgh.filmmaster.DetailsScrollingActivity;
 import com.mgh.filmmaster.Models.moviesModel;
 import com.mgh.filmmaster.R;
 import com.squareup.picasso.Picasso;
@@ -34,7 +36,36 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.Holder
 
     @Override
     public void onBindViewHolder( Holder holder, int i) {
-        holder.bindingData(modelArrayList.get(i));
+        final moviesModel moviesModel = modelArrayList.get(i);
+
+
+        Typeface type = Typeface.createFromAsset(context.getAssets(),"fonts/ColabBol.otf");
+        Typeface typeReg = Typeface.createFromAsset(context.getAssets(),"fonts/ColabReg.otf");
+
+
+        Picasso.with(context).load("http://image.tmdb.org/t/p/w342/"+moviesModel.getPoster_path()).into(holder.imageViewFilm);
+        holder.textViewTitleFilm.setText(moviesModel.getTitle());
+        holder.textViewRateFilm.setText(String.format("%s/10", moviesModel.getVote_average()));
+
+
+        if(moviesModel.isAdult()){
+            holder.textViewAdultFilm.setText("+18");
+        }else{
+            holder.textViewAdultFilm.setText("Safe");
+        }
+
+        holder.textViewTitleFilm.setTypeface(type);
+        holder.textViewRateFilm.setTypeface(typeReg);
+        holder.textViewAdultFilm.setTypeface(typeReg);
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(context, DetailsScrollingActivity.class);
+                intent.putExtra("modelMoviesRes",moviesModel);
+                context.startActivity(intent);
+            }
+        });
     }
 
 
@@ -59,27 +90,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.Holder
             textViewAdultFilm = itemView.findViewById(R.id.movie_adult_tv);
 
 
-        }
-        private void bindingData(moviesModel moviesModel) {
-            Typeface type = Typeface.createFromAsset(context.getAssets(),"fonts/ColabBol.otf");
-            Typeface typeReg = Typeface.createFromAsset(context.getAssets(),"fonts/ColabReg.otf");
-
-
-            Picasso.with(context).load("http://image.tmdb.org/t/p/w342/"+moviesModel.getPoster_path()).into(imageViewFilm);
-            textViewTitleFilm.setText(moviesModel.getTitle());
-            textViewRateFilm.setText(String.format("%s/10", moviesModel.getVote_average()));
-
-
-            if(moviesModel.isAdult()){
-                textViewAdultFilm.setText("+18");
-            }else{
-                textViewAdultFilm.setText("Safe");
-            }
-
-            textViewTitleFilm.setTypeface(type);
-            textViewRateFilm.setTypeface(typeReg);
-            textViewAdultFilm.setTypeface(typeReg);
 
         }
+
     }
 }

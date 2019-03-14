@@ -1,9 +1,12 @@
 package com.mgh.filmmaster.Models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class moviesModel {
+public class moviesModel implements Parcelable {
     public static HashMap<Integer,String> Genres = new HashMap<>();
     private int id;
     private String title;
@@ -27,6 +30,30 @@ public class moviesModel {
         this.vote_count = vote_count;
         this.vote_average = vote_average;
     }
+
+    protected moviesModel(Parcel in) {
+        id = in.readInt();
+        title = in.readString();
+        poster_path = in.readString();
+        backdrop_path = in.readString();
+        adult = in.readByte() != 0;
+        overview = in.readString();
+        release_date = in.readString();
+        vote_count = in.readInt();
+        vote_average = in.readDouble();
+    }
+
+    public static final Creator<moviesModel> CREATOR = new Creator<moviesModel>() {
+        @Override
+        public moviesModel createFromParcel(Parcel in) {
+            return new moviesModel(in);
+        }
+
+        @Override
+        public moviesModel[] newArray(int size) {
+            return new moviesModel[size];
+        }
+    };
 
     public static HashMap<Integer, String> getGenres() {
         return Genres;
@@ -114,5 +141,23 @@ public class moviesModel {
 
     public void setGenresIds(ArrayList<Integer> genresIds) {
         this.genresIds = genresIds;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeString(title);
+        dest.writeString(poster_path);
+        dest.writeString(backdrop_path);
+        dest.writeByte((byte) (adult ? 1 : 0));
+        dest.writeString(overview);
+        dest.writeString(release_date);
+        dest.writeInt(vote_count);
+        dest.writeDouble(vote_average);
     }
 }
