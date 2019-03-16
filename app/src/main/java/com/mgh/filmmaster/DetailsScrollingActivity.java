@@ -5,11 +5,13 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -23,13 +25,15 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.mgh.filmmaster.Adapters.RecyclerAdapter;
+import com.mgh.filmmaster.Adapters.ReviewsAdapter;
 import com.mgh.filmmaster.Models.ActorModel;
+import com.mgh.filmmaster.Models.ReviewModel;
 import com.mgh.filmmaster.Models.moviesModel;
 import com.mgh.filmmaster.Utils.MySingleton;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
+import org.apmem.tools.layouts.FlowLayout;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,6 +42,9 @@ import java.util.ArrayList;
 
 public class DetailsScrollingActivity extends AppCompatActivity {
 
+    ProgressBar castProgres;
+    LinearLayout  castLinearLayout;
+    FlowLayout flowLayout;
     ImageView imageView1,imageView2,imageView3,imageView4,imageView5;
     TextView textViewName1,textViewName2,textViewName3,textViewName4,textViewName5;
     TextView textViewchar1,textViewchar2,textViewchar3,textViewchar4,textViewchar5;
@@ -45,7 +52,8 @@ public class DetailsScrollingActivity extends AppCompatActivity {
     CollapsingToolbarLayout collapsingToolbarLayout;
     ImageView moviePosterIv;
     String idMovies;
-
+    RecyclerView.LayoutManager  manager;
+    RecyclerView recyclerViewReviews;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,8 +66,12 @@ public class DetailsScrollingActivity extends AppCompatActivity {
 
         idMovies=modelMovies.getId()+"";
         String urlActor="https://api.themoviedb.org/3/movie/"+idMovies+"?api_key=654ef11f06c4e69ea63cbcb409be9cd7&append_to_response=credits";
+        String urlTrailler="https://api.themoviedb.org/3/movie/"+idMovies+"/videos?api_key=654ef11f06c4e69ea63cbcb409be9cd7&language=en-US";
+        String urlReviews="https://api.themoviedb.org/3/movie/"+idMovies+"/reviews?api_key=654ef11f06c4e69ea63cbcb409be9cd7&language=en-US";
 
-        detDataFromVolly(urlActor);
+        getDataFromVolly(urlActor);
+        getTraillerFromVolly(urlTrailler);
+        getReviewsFromVolly(urlReviews);
 
         BindingData(modelMovies);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -71,10 +83,129 @@ public class DetailsScrollingActivity extends AppCompatActivity {
             }
         });
     }
+ArrayList<ReviewModel> reviewModelArrayList;
+    private void getReviewsFromVolly(String urlReviews) {
+        Log.e("077777777",urlReviews);
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, urlReviews, null, new Response.Listener<JSONObject>() {
+
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    JSONArray reviews = response.getJSONArray("results");
+                    reviewModelArrayList=new ArrayList<>();
+                    for (int i = 0; i <reviews.length() ; i++) {
+                        JSONObject jsonObject = reviews.getJSONObject(i);
+                        String author = jsonObject.getString("author");
+                        String content = jsonObject.getString("content");
+                        Log.e( "onResponse: ",i+"" );
+                        reviewModelArrayList.add(new ReviewModel(author,content));
+
+                    }
+                    recyclerViewReviews.setLayoutManager(manager);
+                    recyclerViewReviews.setAdapter(new ReviewsAdapter(DetailsScrollingActivity.this,reviewModelArrayList));
+
+                } catch (JSONException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(DetailsScrollingActivity.this, "error5", Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
+        // Access the RequestQueue through your singleton class.
+        MySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
+
+    }
+
+    ArrayList<String> trailers;
+    private void getTraillerFromVolly(String urlTrailler) {
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, urlTrailler, null, new Response.Listener<JSONObject>() {
+
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    JSONArray videos = response.getJSONArray("results");
+                    if (videos.length() > 0) {
+
+                        trailers = new ArrayList<>();
+                        for (int i = 0; i < videos.length(); i++) {
+                            if (videos.getJSONObject(i).getString("type").equals("Trailer")) {
+                                trailers.add(videos.getJSONObject(i).getString("key"));
+                                ActivityCompat.invalidateOptionsMenu(DetailsScrollingActivity.this);
+                                final ImageView imageView = new ImageView(DetailsScrollingActivity.this);
+                                // convert px to dp
+
+
+/*                                int dps_height = 200;
+                                int dps_margin = 8;
+                                final float scale = getResources().getDisplayMetrics().density;
+                                int pixels_h = (int) (dps_height * scale + 0.5f);
+                                int pixels_m = (int) (dps_margin * scale + 0.5f);
+                                //setting image position
+                                final int width = (int) ((getResources().getDisplayMetrics().widthPixels) / 2.2);
+  */
+                                FlowLayout.LayoutParams lp = new FlowLayout.LayoutParams(260,200);
+                                lp.setMargins(40, 40, 40, 20);
+                                imageView.setLayoutParams(lp);
+                                imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+/*
+                                Target target = new Target() {
+                                    @Override
+                                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                                            imageView.setBackground(new BitmapDrawable(getResources(), bitmap));
+                                        }
+                                        imageView.setImageResource(R.drawable.video_shape);
+                                    }
+
+                                    @Override
+                                    public void onBitmapFailed(Drawable errorDrawable) {
+
+                                        Log.d("TAG", "FAILED");
+                                        imageView.setImageResource(R.drawable.video_failed);
+                                    }
+
+                                    @Override
+                                    public void onPrepareLoad(Drawable placeHolderDrawable) {
+                                        Log.d("TAG", "Prepare Load");
+
+                                    }
+                                };
+                                imageView.setTag(R.id.target,target);
+  */
+                                Picasso.with(DetailsScrollingActivity.this).load("http://img.youtube.com/vi/" + videos.getJSONObject(i).getString("key") + "/0.jpg").into(imageView);
+                                //adding view to layout
+                                imageView.setTag(R.id.key, videos.getJSONObject(i).get("key"));
+                                flowLayout.addView(imageView);
+                            }
+                        }
+                    }
+                } catch (JSONException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(DetailsScrollingActivity.this, "error", Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
+        // Access the RequestQueue through your singleton class.
+        MySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest);
+    }
 
     ArrayList<ActorModel> actorModels;
     ActorModel actorModel;
-    private void detDataFromVolly(final String urlActor) {
+    private void getDataFromVolly(final String urlActor) {
 
 
         actorModels=new ArrayList<>();
@@ -106,6 +237,7 @@ public class DetailsScrollingActivity extends AppCompatActivity {
 
 
 
+
                 } catch (JSONException e) {
                   Log.e("WWWWW" ,e.getMessage());
                 }
@@ -128,9 +260,8 @@ public class DetailsScrollingActivity extends AppCompatActivity {
 
 
     }
+    
 
-    ProgressBar castProgres;
-    LinearLayout  castLinearLayout;
     private void setUpAlCast() {
         castProgres.setVisibility(View.GONE);
         castLinearLayout.setVisibility(View.VISIBLE);
@@ -157,9 +288,13 @@ public class DetailsScrollingActivity extends AppCompatActivity {
 
 
     private void setupWedget() {
+        recyclerViewReviews=findViewById(R.id.recviews_rv);
+        manager=new LinearLayoutManager(DetailsScrollingActivity.this,LinearLayoutManager.VERTICAL,false);
+
         castProgres =findViewById(R.id.cast_progressbar);
         castLinearLayout=findViewById(R.id.castLayout);
 
+        flowLayout=findViewById(R.id.flow_layout);
         imageView1 =findViewById(R.id.profile_image1);
         imageView2=findViewById(R.id.profile_image2);
         imageView3=findViewById(R.id.profile_image3);
@@ -190,6 +325,7 @@ public class DetailsScrollingActivity extends AppCompatActivity {
 
     private void BindingData(moviesModel modelMovies) {
 
+        Log.e("id",modelMovies.getId()+"");
         countValueTv.setText(modelMovies.getVote_count()+"");
         voteValueTv.setText(modelMovies.getVote_average()+"");
         nameValueTv.setText(modelMovies.getTitle());

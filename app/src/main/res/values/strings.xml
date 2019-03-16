@@ -1,5 +1,7 @@
 <resources>
 
+    <item name="target" type="id"/>
+    <item name="key" type="id"/>
     <string name="Api_Key">654ef11f06c4e69ea63cbcb409be9cd7</string>
     <string name="app_name">FilmMaster</string>
     <string name="title_activity_list">List Movies</string>
