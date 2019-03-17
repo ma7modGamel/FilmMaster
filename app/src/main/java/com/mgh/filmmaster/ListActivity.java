@@ -1,6 +1,8 @@
 package com.mgh.filmmaster;
 //01000862782
 
+import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -44,6 +46,9 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     TextView textViewCurrentPage;
     private int lastPages, currentPage;
     Button buttonNextPage, buttonPreviesPage;
+    final String url = "https://api.themoviedb.org/3/movie/popular?api_key=654ef11f06c4e69ea63cbcb409be9cd7&language=en-US&page=";
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +57,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         final FloatingActionButton fab =  findViewById(R.id.fab);
+
         buttonNextPage = findViewById(R.id.btnNext);
         buttonPreviesPage = findViewById(R.id.btnPrevies);
         recyclerView = findViewById(R.id.idRecyclerView);
@@ -70,8 +76,19 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             }
         });
         textViewCurrentPage=findViewById(R.id.tv_currentpage);
-        manager = new GridLayoutManager(this, 2, LinearLayoutManager.VERTICAL, false);
-        recyclerView.setLayoutManager(manager);
+
+
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+
+            manager = new GridLayoutManager(this, 3, LinearLayoutManager.VERTICAL, false);
+
+        } else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+
+            manager = new GridLayoutManager(this, 2, LinearLayoutManager.VERTICAL, false);
+
+        }
+
+         recyclerView.setLayoutManager(manager);
 
 
         buttonClose = findViewById(R.id.btnCloseLayout);
@@ -125,7 +142,6 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
     }
-   final String url = "https://api.themoviedb.org/3/movie/popular?api_key=654ef11f06c4e69ea63cbcb409be9cd7&language=en-US&page=";
 
     
 
